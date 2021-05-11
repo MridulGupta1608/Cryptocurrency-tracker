@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'react-bootstrap/Image';
+import {Nav,Navbar,NavbarBrand} from 'reactstrap';
 import axios from 'axios';
 import './App.css';
 import './Coin.css';
 import Coin from './Coin';
+import ScrollToTop from './ScrollToTop';
 
 function App() {
+
+
+
+
   const [coins, setCoins] = useState([]);
   const [search, setSearch] = useState('');
 
@@ -27,32 +34,55 @@ function App() {
   );
 
   return (
-    <div className='coin-app'>
-      <div className='coin-search'>
-        <h1 className='coin-text'>Search a currency</h1>
-        <form>
-          <input
-            className='coin-input'
-            type='text'
-            onChange={handleChange}
-            placeholder='Search'
-          />
-        </form>
+    <div>
+        <header className="App-header">
+          <div className="navstyle" >
+            <Navbar fixed = "top">
+              <div className ="container">
+                <NavbarBrand><img src="images/logo.jpeg" width ="41" height="40" style={{borderRadius:"50%" , zIndex: 1}} alt="logo"/></NavbarBrand>
+              </div>
+            </Navbar>
+          </div>
+        </header>
+
+        <div className="circle" style={{marginLeft:"1300px", marginTop:"-250px"}}></div>
+        <div className="circle" style={{marginLeft:"-30px", marginTop:"500px"}}></div>
+        
+        <div className="scroll">
+          <ScrollToTop/>
+        </div>
+
+      <div className='coin-app'>
+        <div className='coin-search'>
+          <h1 className='coin-text'>Search a currency</h1>
+          <form>
+            <input
+              className='coin-input'
+              type='text'
+              onChange={handleChange}
+              placeholder='Search'
+            />
+          </form>
+        </div>
+        
+        {filteredCoins.map(coin => {
+          return (
+            <Coin
+              key={coin.id}
+              name={coin.name}
+              price={coin.current_price}
+              symbol={coin.symbol}
+              volume={coin.total_volume}
+              marketcap={coin.market_cap}
+              image={coin.image}
+              priceChange={coin.price_change_percentage_24h}
+            />
+          );
+        })}
       </div>
-      {filteredCoins.map(coin => {
-        return (
-          <Coin
-            key={coin.id}
-            name={coin.name}
-            price={coin.current_price}
-            symbol={coin.symbol}
-            volume={coin.total_volume}
-            marketcap={coin.market_cap}
-            image={coin.image}
-            priceChange={coin.price_change_percentage_24h}
-          />
-        );
-      })}
+      
+   
+      
     </div>
   );
 }
