@@ -1,72 +1,80 @@
 import React, { useState, useEffect } from 'react';
-import Image from 'react-bootstrap/Image';
-import {Nav,Navbar,NavbarBrand} from 'reactstrap';
 import axios from 'axios';
 import './App.css';
 import './Coin.css';
 import Coin from './Coin';
 import ScrollToTop from './ScrollToTop';
+import Modal from './Modal';
 
 function App() {
-
-
-
-
   const [coins, setCoins] = useState([]);
   const [search, setSearch] = useState('');
+  const [show, setShow] = useState(false);
+  const [coinInModal, setCoinInModal] = useState({});
 
-  useEffect(() => {
+  const getCoins = async () => {
     axios
-    .get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=inr&order=market_cap_desc&per_page=100&page=1&sparkline=false')
+      .get('https://api.coingecko.com/api/v3/coins/markets?vs_currency=inr&order=market_cap_desc&per_page=100&page=1&sparkline=false')
       .then(res => {
         setCoins(res.data);
-        console.log(res.data);
+        // console.log(res.data);
       })
       .catch(error => console.log(error));
+  }
+
+  useEffect(() => {
+
+    getCoins()
+
+    const interval = setInterval(() => {
+      getCoins()
+    }, 10000)
+
+    return () => clearInterval(interval)
+
   }, []);
+
 
   const handleChange = e => {
     setSearch(e.target.value);
   };
+
+  const showModal = (coin) => {
+    setShow(true);
+    setCoinInModal(coin);
+  }
+
+  const hideModal = (e) => {
+    setShow(false);
+  }
+
+
 
   const filteredCoins = coins.filter(coin =>
     coin.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div>
-        <header className="App-header">
-          <div className="navstyle" >
-            <Navbar fixed = "top">
-              <div className ="container">
-                <NavbarBrand><img src="images/logo.jpeg" width ="41" height="40" style={{borderRadius:"50%" , zIndex: 1}} alt="logo"/></NavbarBrand>
-              </div>
-            </Navbar>
-          </div>
-        </header>
+    <div className='coin-app'>
+      <div className='coin-search'>
+        <h1 className='coin-text'>Search a currency</h1>
+        <form>
+          <input
+            className='coin-input'
+            type='text'
+            onChange={handleChange}
+            placeholder='Search'
+          />
+        </form>
+      </div>
 
-        <div className="circle" style={{marginLeft:"1300px", marginTop:"-250px"}}></div>
-        <div className="circle" style={{marginLeft:"-30px", marginTop:"500px"}}></div>
-        
-        <div className="scroll">
-          <ScrollToTop/>
-        </div>
 
-      <div className='coin-app'>
-        <div className='coin-search'>
-          <h1 className='coin-text'>Search a currency</h1>
-          <form>
-            <input
-              className='coin-input'
-              type='text'
-              onChange={handleChange}
-              placeholder='Search'
-            />
-          </form>
-        </div>
-        
-        {filteredCoins.map(coin => {
-          return (
+
+      <Modal coin={coinInModal} show={show} hideModal={hideModal} />
+      {filteredCoins.map(coin => {
+        return (
+
+          <div key={coin.id} onClick={e => showModal(coin)}>
             <Coin
               key={coin.id}
               name={coin.name}
@@ -76,13 +84,12 @@ function App() {
               marketcap={coin.market_cap}
               image={coin.image}
               priceChange={coin.price_change_percentage_24h}
+              showModal={showModal}
             />
-          );
-        })}
-      </div>
-      
-   
-      
+          </div>
+        );
+      })}
+      <ScrollToTop />
     </div>
   );
 }
